@@ -36,7 +36,7 @@ var opts struct {
 
 var conf config.Configuration
 
-func initGoogleOIDC(callbackUrl *url.URL) *web.OIDC {
+func initGoogleOIDC(conf *config.Configuration, callbackUrl *url.URL) *web.OIDC {
 	provider, err := oidc.NewProvider(context.Background(), "https://accounts.google.com")
 	if err != nil {
 		log.Fatalf("Cannot get oidc provider: %s", err)
@@ -252,7 +252,7 @@ func main() {
 
 	if conf.Server.GoogleEnabled() {
 		log.Printf("enabling google iap authentication")
-		o := initGoogleOIDC(url)
+		o := initGoogleOIDC(&conf, url)
 		r.Handle("/connect", o.Authenticated(http.HandlerFunc(h.HandleDownload)))
 		r.HandleFunc("/oauth2/google/callback", o.HandleGoogleCallback)
 
