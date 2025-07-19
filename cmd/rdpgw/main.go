@@ -52,7 +52,7 @@ func initGoogleOIDC(conf *config.Configuration, callbackUrl *url.URL) *web.OIDC 
 		ClientSecret: conf.Google.ClientSecret,
 		RedirectURL:  redirectUrl,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{"https://www.googleapis.com/auth/iap.projects.list"},
+		Scopes:       []string{oidc.ScopeOpenID, "profile", "email"},
 	}
 	security.OIDCProvider = provider
 	security.Oauth2Config = oauthConfig
