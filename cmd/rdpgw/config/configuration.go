@@ -30,6 +30,7 @@ const (
 type Configuration struct {
 	Server   ServerConfig   `koanf:"server"`
 	OpenId   OpenIDConfig   `koanf:"openid"`
+	Google   GoogleConfig   `koanf:"google"`
 	Kerberos KerberosConfig `koanf:"kerberos"`
 	Caps     RDGCapsConfig  `koanf:"caps"`
 	Security SecurityConfig `koanf:"security"`
@@ -64,6 +65,12 @@ type OpenIDConfig struct {
 	ProviderUrl  string `koanf:"providerurl"`
 	ClientId     string `koanf:"clientid"`
 	ClientSecret string `koanf:"clientsecret"`
+}
+
+type GoogleConfig struct {
+	ClientId     string `koanf:"clientid"`
+	ClientSecret string `koanf:"clientsecret"`
+	RedirectUrl string `koanf:"redirecturl"`
 }
 
 type RDGCapsConfig struct {
@@ -180,6 +187,7 @@ func Load(configFile string) Configuration {
 	koanfTag := koanf.UnmarshalConf{Tag: "koanf"}
 	k.UnmarshalWithConf("Server", &Conf.Server, koanfTag)
 	k.UnmarshalWithConf("OpenId", &Conf.OpenId, koanfTag)
+	k.UnmarshalWithConf("Google", &Conf.Google, koanfTag)
 	k.UnmarshalWithConf("Caps", &Conf.Caps, koanfTag)
 	k.UnmarshalWithConf("Security", &Conf.Security, koanfTag)
 	k.UnmarshalWithConf("Client", &Conf.Client, koanfTag)
@@ -255,6 +263,10 @@ func (s *ServerConfig) BasicAuthEnabled() bool {
 
 func (s *ServerConfig) NtlmEnabled() bool {
 	return s.matchAuth("ntlm")
+}
+
+func (s *ServerConfig) GoogleEnabled() bool {
+	return s.matchAuth("google")
 }
 
 func (s *ServerConfig) matchAuth(needle string) bool {

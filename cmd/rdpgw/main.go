@@ -36,6 +36,30 @@ var opts struct {
 
 var conf config.Configuration
 
+func initGoogleOIDC(callbackUrl *url.URL) *web.OIDC {
+	provider, err := oidc.NewProvider(context.Background(), "https://accounts.google.com")
+	if err != nil {
+		log.Fatalf("Cannot get oidc provider: %s", err)
+	}
+
+	oauthConfig := oauth2.Config{
+		ClientID:     conf.Google.ClientId,
+		ClientSecret: conf.Google.ClientSecret,
+		RedirectURL:  callbackUrl.String(),
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{"https://www.googleapis.com/auth/iap.projects.list"},
+	}
+	security.OIDCProvider = provider
+	security.Oauth2Config = oauthConfig
+
+	o := web.OIDCConfig{
+		OAuth2Config:      &oauthConfig,
+		OIDCTokenVerifier: nil, // no verification needed, done by proxy
+	}
+
+	return o.New()
+}
+
 func initOIDC(callbackUrl *url.URL) *web.OIDC {
 	// set oidc config
 	provider, err := oidc.NewProvider(context.Background(), conf.OpenId.ProviderUrl)
@@ -219,6 +243,18 @@ func main() {
 		o := initOIDC(url)
 		r.Handle("/connect", o.Authenticated(http.HandlerFunc(h.HandleDownload)))
 		r.HandleFunc("/callback", o.HandleCallback)
+
+		// only enable un-auth endpoint for openid only config
+		if !conf.Server.KerberosEnabled() && !conf.Server.BasicAuthEnabled() && !conf.Server.NtlmEnabled() {
+			rdp.Name("gw").HandlerFunc(gw.HandleGatewayProtocol)
+		}
+	}
+
+	if conf.Server.GoogleEnabled() {
+		log.Printf("enabling google iap authentication")
+		o := initGoogleOIDC(url)
+		r.Handle("/connect", o.Authenticated(http.HandlerFunc(h.HandleDownload)))
+		r.HandleFunc("/oauth2/google/callback", o.HandleGoogleCallback)
 
 		// only enable un-auth endpoint for openid only config
 		if !conf.Server.KerberosEnabled() && !conf.Server.BasicAuthEnabled() && !conf.Server.NtlmEnabled() {

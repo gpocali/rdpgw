@@ -98,6 +98,36 @@ func (h *OIDC) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, url, http.StatusFound)
 }
 
+func (h *OIDC) HandleGoogleCallback(w http.ResponseWriter, r *http.Request) {
+	state := r.URL.Query().Get("state")
+	s, found := h.stateStore.Get(state)
+	if !found {
+		http.Error(w, "unknown state", http.StatusBadRequest)
+		return
+	}
+	url := s.(string)
+
+	ctx := r.Context()
+	oauth2Token, err := h.oAuth2Config.Exchange(ctx, r.URL.Query().Get("code"))
+	if err != nil {
+		http.Error(w, "Failed to exchange token: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// aaccess token is all we need for google proxying
+	// it is stored in the session
+	id := identity.FromRequestCtx(r)
+	id.SetAuthenticated(true)
+	id.SetAuthTime(time.Now())
+	id.SetAttribute(identity.AttrAccessToken, oauth2Token.AccessToken)
+
+	if err = SaveSessionIdentity(r, w, id); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+
+	http.Redirect(w, r, url, http.StatusFound)
+}
+
 func findUsernameInClaims(data map[string]interface{}) string {
 	candidates := []string{"preferred_username", "unique_name", "upn", "username"}
 	for _, claim := range candidates {
