@@ -142,7 +142,13 @@ func main() {
 			NoUsername: conf.Client.NoUsername,
 		},
 		GatewayAddress: url,
-		TemplateFile:   conf.Client.Defaults,
+	}
+
+	if _, err := os.Stat(conf.Client.Defaults); os.IsNotExist(err) {
+		log.Printf("RDP template file %s not found, using defaults", conf.Client.Defaults)
+		w.TemplateFile = ""
+	} else {
+		w.TemplateFile = conf.Client.Defaults
 	}
 
 	if conf.Caps.TokenAuth {
@@ -183,7 +189,7 @@ func main() {
 		}
 
 		if !tlsConfigured {
-			log.Printf("Using acme / letsencrypt for tls configuration. Enabling http (port 80) for verification")
+			log.Printf("Using acme / letsencrypt for tls configuration. Enabling http for verification")
 			// setup a simple handler which sends a HTHS header for six months (!)
 			http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				w.Header().Set("Strict-Transport-Security", "max-age=15768000 ; includeSubDomains")
@@ -198,7 +204,7 @@ func main() {
 			cfg.GetCertificate = certMgr.GetCertificate
 
 			go func() {
-				http.ListenAndServe(":80", certMgr.HTTPHandler(nil))
+				http.ListenAndServe(":"+strconv.Itoa(conf.Server.AcmeHttpChallengePort), certMgr.HTTPHandler(nil))
 			}()
 		}
 	}

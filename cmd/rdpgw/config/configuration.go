@@ -38,22 +38,23 @@ type Configuration struct {
 }
 
 type ServerConfig struct {
-	GatewayAddress       string   `koanf:"gatewayaddress"`
-	Port                 int      `koanf:"port"`
-	CertFile             string   `koanf:"certfile"`
-	KeyFile              string   `koanf:"keyfile"`
-	Hosts                []string `koanf:"hosts"`
-	HostSelection        string   `koanf:"hostselection"`
-	SessionKey           string   `koanf:"sessionkey"`
-	SessionEncryptionKey string   `koanf:"sessionencryptionkey"`
-	SessionStore         string   `koanf:"sessionstore"`
-	MaxSessionLength     int      `koanf:"maxsessionlength"`
-	SendBuf              int      `koanf:"sendbuf"`
-	ReceiveBuf           int      `koanf:"receivebuf"`
-	Tls                  string   `koanf:"tls"`
-	Authentication       []string `koanf:"authentication"`
-	AuthSocket           string   `koanf:"authsocket"`
-	BasicAuthTimeout     int      `koanf:"basicauthtimeout"`
+	GatewayAddress        string   `koanf:"gatewayaddress"`
+	Port                  int      `koanf:"port"`
+	CertFile              string   `koanf:"certfile"`
+	KeyFile               string   `koanf:"keyfile"`
+	Hosts                 []string `koanf:"hosts"`
+	HostSelection         string   `koanf:"hostselection"`
+	SessionKey            string   `koanf:"sessionkey"`
+	SessionEncryptionKey  string   `koanf:"sessionencryptionkey"`
+	SessionStore          string   `koanf:"sessionstore"`
+	MaxSessionLength      int      `koanf:"maxsessionlength"`
+	SendBuf               int      `koanf:"sendbuf"`
+	ReceiveBuf            int      `koanf:"receivebuf"`
+	Tls                   string   `koanf:"tls"`
+	Authentication        []string `koanf:"authentication"`
+	AuthSocket            string   `koanf:"authsocket"`
+	BasicAuthTimeout      int      `koanf:"basicauthtimeout"`
+	AcmeHttpChallengePort int      `koanf:"acmehttpchallengeport"`
 }
 
 type KerberosConfig struct {
