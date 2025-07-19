@@ -184,6 +184,7 @@ func main() {
 			if err != nil {
 				log.Printf("Cannot load certfile or keyfile (%s) falling back to acme", err)
 			}
+			log.Printf("Loaded certificate for %s", cert.Leaf.Subject.CommonName)
 			cfg.Certificates = append(cfg.Certificates, cert)
 			tlsConfigured = true
 		}
