@@ -42,10 +42,15 @@ func initGoogleOIDC(conf *config.Configuration, callbackUrl *url.URL) *web.OIDC 
 		log.Fatalf("Cannot get oidc provider: %s", err)
 	}
 
+	redirectUrl := callbackUrl.String()
+	if conf.Google.RedirectUrl != "" {
+		redirectUrl = conf.Google.RedirectUrl
+	}
+
 	oauthConfig := oauth2.Config{
 		ClientID:     conf.Google.ClientId,
 		ClientSecret: conf.Google.ClientSecret,
-		RedirectURL:  callbackUrl.String(),
+		RedirectURL:  redirectUrl,
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{"https://www.googleapis.com/auth/iap.projects.list"},
 	}
