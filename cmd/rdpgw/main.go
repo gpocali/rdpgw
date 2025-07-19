@@ -196,9 +196,14 @@ func main() {
 				fmt.Fprintf(w, "Hello from RDPGW")
 			})
 
+			u, err := url.Parse(conf.Server.GatewayAddress)
+			if err != nil {
+				log.Fatalf("Cannot parse gateway address for autocert: %s", err)
+			}
+
 			certMgr := autocert.Manager{
 				Prompt:     autocert.AcceptTOS,
-				HostPolicy: autocert.HostWhitelist(conf.Server.Hosts...),
+				HostPolicy: autocert.HostWhitelist(u.Host),
 				Cache:      autocert.DirCache("/tmp/rdpgw"),
 			}
 			cfg.GetCertificate = certMgr.GetCertificate
